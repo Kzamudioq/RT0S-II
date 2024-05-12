@@ -1,0 +1,13 @@
+../Core/Src/main.c:82:5:main	1
+../Core/Src/main.c:166:6:SystemClock_Config	3
+../Core/Src/main.c:213:13:MX_TIM2_Init	4
+../Core/Src/main.c:258:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:291:13:MX_GPIO_Init	1
+../Core/Src/main.c:325:6:configureTimerForRunTimeStats	1
+../Core/Src/main.c:330:15:getRunTimeCounterValue	1
+../Core/Src/main.c:336:6:vApplicationIdleHook	1
+../Core/Src/main.c:353:6:vApplicationTickHook	1
+../Core/Src/main.c:364:6:vApplicationStackOverflowHook	1
+../Core/Src/main.c:386:6:StartDefaultTask	1
+../Core/Src/main.c:405:6:HAL_TIM_PeriodElapsedCallback	3
+../Core/Src/main.c:426:6:Error_Handler	1
