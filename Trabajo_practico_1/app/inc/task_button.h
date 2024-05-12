@@ -1,32 +1,26 @@
 /*
- * @file   : task_button.h
- * @date   : May 9, 2024
- * @author : grupo_3
+ * task_button.h
  *
- * @brief  : Header file for the button task
- *
- * This file declares macros and functions related to the button task.
- * It defines the task period in milliseconds and the value to indicate a button press.
+ *  Created on: May 9, 2024
+ *      Author: royer.sanabria
  */
+
+//#pragma once
+#include "cmsis_os.h"
+
 
 #ifndef INC_TASK_BUTTON_H_
 #define INC_TASK_BUTTON_H_
 
-/********************** Macro Definitions ************************************/
+typedef struct ButtonActiveObject
+{
+    QueueHandle_t queue_button_h;
+    TaskHandle_t *task_button_h;
+} ButtonActiveObject_t;
 
-#define TASK_PERIOD_MS_    (1000)        // Task period in milliseconds
-#define BUTTON_PRESSED      GPIO_PIN_RESET   // Value to indicate a button press
+extern ButtonActiveObject_t ButtonActiveObject;
 
-/********************** Function Declarations *******************************/
+void button_initialize_ao(ButtonActiveObject_t *parameters);
 
-/**
- * @brief Task function for handling button events.
- *
- * This function is responsible for handling button events and performing
- * appropriate actions based on the button state.
- *
- * @param parametros Task parameters (unused).
- */
-void task_button(void *parametros);
 
 #endif /* INC_TASK_BUTTON_H_ */

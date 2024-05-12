@@ -44,8 +44,10 @@ app/src/task_user_interface.o: ../app/src/task_user_interface.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
- ../app/inc/app.h ../app/inc/logger.h ../app/inc/board.h ../app/inc/dwt.h \
- ../app/inc/task_user_interface.h
+ ../app/inc/app.h ../app/inc/task_button.h ../app/inc/task_led.h \
+ ../app/inc/task_user_interface.h ../app/inc/logger.h ../app/inc/board.h \
+ ../app/inc/dwt.h ../app/inc/task_user_interface.h \
+ ../app/inc/task_button.h ../app/inc/task_led.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -93,7 +95,12 @@ app/src/task_user_interface.o: ../app/src/task_user_interface.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h:
 ../app/inc/app.h:
+../app/inc/task_button.h:
+../app/inc/task_led.h:
+../app/inc/task_user_interface.h:
 ../app/inc/logger.h:
 ../app/inc/board.h:
 ../app/inc/dwt.h:
 ../app/inc/task_user_interface.h:
+../app/inc/task_button.h:
+../app/inc/task_led.h:

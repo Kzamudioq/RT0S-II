@@ -1,17 +1,11 @@
 /*
- * @file   : led.c
- * @date   : May 8, 2024
- * @author : grupo_3
+ * led.c
  *
- * @brief  : Task functions for controlling the LEDs.
- *
- * This file contains task functions for controlling the red, blue, and green LEDs.
- * Each task listens to its corresponding queue for messages containing instructions
- * to turn on the LED for a specified duration. Upon receiving a message, the task
- * turns on the LED, waits for the specified duration, and then turns off the LED.
+ *  Created on: May 8, 2024
+ *      Author: royer.sanabria
  */
 
-/********************** Inclusions *******************************************/
+/********************** inclusions *******************************************/
 
 #include "task_led.h"
 #include "main.h"
@@ -21,143 +15,93 @@
 #include "app.h"
 #include "board.h"
 #include "task_user_interface.h"
+#include <stdlib.h>
 
-/********************** Task Functions ****************************************/
 
-/**
- * @brief Task function for controlling the red LED.
- *
- * This task controls the red LED based on messages received
- * through the red LED queue.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_red(void *parameters) {
-    // Get the name of the task
-    char *p_task_name_red = (char *)pcTaskGetName(NULL);
-    LOGGER_LOG("  %s is running - \r\n", p_task_name_red);
+#define LED_ON					GPIO_PIN_SET
+#define LED_OFF					GPIO_PIN_RESET
+#define TIME_TURN_ON_LED_RED	1000
+#define TIME_TURN_ON_LED_BLUE	1000
+#define TIME_TURN_ON_LED_GREEN	1000
+#define LENGTH_QUEUE_PULSE 5
+#define SIZE_QUEUE_PULSE sizeof(state_button_t)
 
-    // Variable to store the received message
-    message_led_t message_user_interface;
+uint16_t	  ldx_pin[]			= {LED_R_Pin,       LED_G_Pin,       LED_B_Pin};
+GPIO_TypeDef* ldx_gpio_port[]	= {LED_R_GPIO_Port, LED_G_GPIO_Port, LED_B_GPIO_Port};
 
-    // Variable to store the time tick
-    TickType_t time_tick;
+static void task_led(void *parameters);
 
-    // Main task loop
-    while (true) {
-        // Wait for a message from the red LED queue
-        if (pdPASS == xQueueReceive(queue_led_red_h, &message_user_interface, portMAX_DELAY)) {
-            LOGGER_LOG("  TURN ON: %s  <-->", p_task_name_red);
+typedef struct send_message_led {
+  LedActiveObject_t *LAO_MS_UI;
+  led_type_t color_led;
+} send_message_led_t;
 
-            // Record the time tick when the LED is turned on
-            time_tick = xTaskGetTickCount();
+typedef enum flag{
+	OUT_,
+	PULSE_,
+	SHORT_,
+	LONG_,
+	ERROR_,
+}flag_t;
 
-            // Turn on the red LED
-            HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, SET);
+void led_initialize_ao(void* parameters, const char* ao_task_name, led_type_t led_type)
+{
+	BaseType_t ret;
+	send_message_led_t* const send_message_led = malloc(sizeof(send_message_led_t));
+	if (send_message_led == NULL) { return;}
 
-            // Delay for the specified duration
-            HAL_Delay(message_user_interface.tick_time_led);
+	send_message_led->LAO_MS_UI = (LedActiveObject_t*) parameters;
+	send_message_led->color_led = led_type;
 
-            // Turn off the red LED
-            HAL_GPIO_WritePin(LED_R_GPIO_Port, LED_R_Pin, RESET);
+	LedActiveObject_t *AO = (LedActiveObject_t *)parameters;
+    ret = xTaskCreate(task_led,
+    				  ao_task_name,
+					  (2 * configMINIMAL_STACK_SIZE),
+					  (void *)send_message_led,
+					  (tskIDLE_PRIORITY + 1UL),
+					  AO->task_led_h);
+    configASSERT(ret == pdPASS);
 
-            // Calculate the duration the LED was on
-            time_tick = xTaskGetTickCount() - time_tick;
-
-            // Log the time the LED was on
-            LOGGER_LOG("  TIME ON %lu ms\r\n", time_tick);
-        }
-    }
+    AO->queue_led_h = xQueueCreate(LENGTH_QUEUE_PULSE, SIZE_QUEUE_PULSE);
+        configASSERT (AO->queue_led_h);
+       // LOGGER_LOG("\r\n --> Initialization of task button completed \r\n");
+LOGGER_LOG(" --> %s created \r\n", ao_task_name);
 }
 
-/**
- * @brief Task function for controlling the blue LED.
- *
- * This task controls the blue LED based on messages received
- * through the blue LED queue.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_blue(void *parameters) {
-    // Get the name of the task
-    char *p_task_name_blue = (char *)pcTaskGetName(NULL);
-    LOGGER_LOG("  %s is running - \r\n", p_task_name_blue);
 
-    // Variable to store the received message
-    message_led_t message_user_interface;
 
-    // Variable to store the time tick
-    TickType_t time_tick;
 
-    // Main task loop
-    while (true) {
-        // Wait for a message from the blue LED queue
-        if (pdPASS == xQueueReceive(queue_led_blue_h, &message_user_interface, portMAX_DELAY)) {
-            LOGGER_LOG("  TURN ON: %s  <-->", p_task_name_blue);
+void task_led(void *parameters)
+{
 
-            // Record the time tick when the LED is turned on
-            time_tick = xTaskGetTickCount();
+	send_message_led_t* message = (send_message_led_t*) parameters;
+	LedActiveObject_t*  led = message->LAO_MS_UI;
+	led_type_t pin_led = message->color_led;
+	state_button_t event;
 
-            // Turn on the blue LED
-            HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, SET);
+	GPIO_TypeDef* port;
+	uint16_t	pin;
+	TickType_t delay_led;
+	TickType_t time_tick;
 
-            // Delay for the specified duration
-            HAL_Delay(message_user_interface.tick_time_led);
+	if(RED == pin_led){  port=ldx_gpio_port[0];  pin =  ldx_pin[0]; delay_led = TIME_TURN_ON_LED_RED;}
+	else if(GREEN== pin_led){port=ldx_gpio_port[1]; pin =  ldx_pin[1]; delay_led = TIME_TURN_ON_LED_GREEN ; }
+	else {port=ldx_gpio_port[2]; pin =  ldx_pin[2];delay_led = TIME_TURN_ON_LED_BLUE;}
 
-            // Turn off the blue LED
-            HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, RESET);
+	while(true)
+	{
+		if (xQueueReceive(led->queue_led_h, &event, portMAX_DELAY) == pdPASS)
+		{
+			printf(" --> TURN ON [%s]\r\n", pcTaskGetName(NULL));
+			time_tick = xTaskGetTickCount();
+			HAL_GPIO_WritePin(port, pin, LED_ON);
+			HAL_Delay(delay_led);
+			HAL_GPIO_WritePin(port, pin, LED_OFF);
+			time_tick = xTaskGetTickCount()-time_tick;
+			printf(" --> TURN OFF %s Time ON: %lu \r\n", pcTaskGetName(NULL), time_tick);
 
-            // Calculate the duration the LED was on
-            time_tick = xTaskGetTickCount() - time_tick;
-
-            // Log the time the LED was on
-            LOGGER_LOG("  TIME ON %lu ms\r\n", time_tick);
-        }
-    }
+		}
+	}
 }
 
-/**
- * @brief Task function for controlling the green LED.
- *
- * This task controls the green LED based on messages received
- * through the green LED queue.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_green(void *parameters) {
-    // Get the name of the task
-    char *p_task_name_green = (char *)pcTaskGetName(NULL);
-    LOGGER_LOG("  %s is running - \r\n", p_task_name_green);
 
-    // Variable to store the received message
-    message_led_t message_user_interface;
-
-    // Variable to store the time tick
-    TickType_t time_tick;
-
-    // Main task loop
-    while (true) {
-        // Wait for a message from the green LED queue
-        if (pdPASS == xQueueReceive(queue_led_green_h, &message_user_interface, portMAX_DELAY)) {
-            LOGGER_LOG("  TURN ON: %s  <-->", p_task_name_green);
-
-            // Record the time tick when the LED is turned on
-            time_tick = xTaskGetTickCount();
-
-            // Turn on the green LED
-            HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, SET);
-
-            // Delay for the specified duration
-            HAL_Delay(message_user_interface.tick_time_led);
-
-            // Turn off the green LED
-            HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, RESET);
-
-            // Calculate the duration the LED was on
-            time_tick = xTaskGetTickCount() - time_tick;
-
-            // Log the time the LED was on
-            LOGGER_LOG("  TIME ON %lu ms\r\n", time_tick);
-        }
-    }
-}

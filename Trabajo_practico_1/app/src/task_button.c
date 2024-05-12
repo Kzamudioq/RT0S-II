@@ -1,17 +1,9 @@
 /*
- * @file   : task_button.c
- * @date   : May 9, 2024
- * @author : grupo_3
+ * task_button.c
  *
- * @brief  : Task that monitors the state of the button and sends messages to a queue when a press is detected.
- *
- * This file implements a task responsible for monitoring the state of a button. When a button press is detected,
- * it measures the duration of the press and sends the duration (in ticks) to a queue for further processing.
- * The task runs continuously, polling the button state periodically.
+ *  Created on: May 9, 2024
+ *      Author: royer.sanabria
  */
-
-/********************** Inclusions *******************************************/
-
 #include "main.h"
 #include "task_button.h"
 #include <stdbool.h>
@@ -20,45 +12,53 @@
 #include "dwt.h"
 #include "board.h"
 #include "app.h"
+#include "FreeRTOS.h"
+/// | define-------------------
+#define LENGTH_QUEUE_PULSE 5
+#define SIZE_QUEUE_PULSE (sizeof(TickType_t))
+#define TASK_PERIOD_MS_         (1000)
+#define BUTTON_PRESSED GPIO_PIN_RESET
 
-/********************** Function Definitions *********************************/
 
-/**
- * @brief Task function for monitoring button state.
- *
- * This function continuously monitors the state of the button. When a button press is detected,
- * it measures the duration of the press and sends the duration (in ticks) to a queue for further processing.
- *
- * @param parametros Pointer to task parameters (unused).
- */
-void task_button(void *parametros)
+/// | Private variables ------------------------------
+
+void task_button(void *parameters);
+
+void button_initialize_ao(ButtonActiveObject_t *parameters)
 {
-    // Get the name of the task
-    char *p_task_name = (char *)pcTaskGetName(NULL);
-    LOGGER_LOG("Task: %s\r\n", p_task_name);
+	BaseType_t ret;
+	ButtonActiveObject_t* const AO = (ButtonActiveObject_t *)parameters;
+    ret = xTaskCreate(task_button,
+    				  "Task button",
+					  (2 * configMINIMAL_STACK_SIZE),
+					  (void *)AO,
+					  (tskIDLE_PRIORITY + 1UL),
+					  AO->task_button_h);
+    configASSERT(ret == pdPASS);
 
-    // Variable to store the time tick when button is pressed
-    TickType_t time_tick;
+     AO->queue_button_h = xQueueCreate(LENGTH_QUEUE_PULSE, SIZE_QUEUE_PULSE);
+    configASSERT (AO->queue_button_h != NULL);
+ }
 
-    // Main task loop
-    while(true)
-    {
-        // Check if the button is pressed
-        if (BUTTON_PRESSED == HAL_GPIO_ReadPin(PORT_BUTTON, PIN_BUTTON))
-        {
-            // Record the time tick when button is pressed
-            time_tick = xTaskGetTickCount();
 
-            // Wait for the button to be released
-            while (BUTTON_PRESSED == HAL_GPIO_ReadPin(PORT_BUTTON, PIN_BUTTON))
-            {
-            }
+ void task_button(void *parameters)
+{
+	ButtonActiveObject_t* const AO = (ButtonActiveObject_t *)parameters;
+	TickType_t time_tick;
+	TickType_t check_send;
 
-            // Calculate the duration of the button press
-            time_tick = xTaskGetTickCount() - time_tick;
-
-            // Send the duration to the queue for further processing
-            xQueueSend(queue_pulse_h, &time_tick, 0);
-        }
-    }
+	while(true)
+	{
+		if (BUTTON_PRESSED == HAL_GPIO_ReadPin(PORT_BUTTON, PIN_BUTTON))
+		{
+			time_tick = xTaskGetTickCount();
+			while (BUTTON_PRESSED == HAL_GPIO_ReadPin(PORT_BUTTON, PIN_BUTTON))
+			{
+			}
+			time_tick = xTaskGetTickCount() - time_tick;
+			check_send = xQueueSend(AO->queue_button_h, &time_tick, 0);
+			if (check_send == pdPASS){LOGGER_LOG("\r\n --> Task Button Sending message %d\r\n",time_tick);}
+		}
+	}
 }
+

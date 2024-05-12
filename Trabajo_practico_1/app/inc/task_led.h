@@ -1,54 +1,42 @@
 /*
- * @file   : led.h
- * @date   : May 8, 2024
- * @author : grupo_3
+ * led.h
  *
- * @brief  : Header file for LED tasks
- *
- * This file declares macros and functions related to controlling LEDs.
- * It defines macros for setting LEDs on and off, as well as function prototypes
- * for the tasks responsible for controlling each LED.
+ *  Created on: May 8, 2024
+ *      Author: royer.sanabria
  */
+#include "cmsis_os.h"
 
-#ifndef TASK_LED_H_
-#define TASK_LED_H_
+#ifndef INC_TASK_LED_H_
+#define INC_TASK_LED_H_
 
-/********************** Header Files ****************************************/
 
-#include "main.h"
 
-/********************** Macro Definitions ************************************/
+typedef enum state_button
+{
+	PULSE_OUT,
+	PULSE_PULSE,
+	PULSE_SHORT,
+	PULSE_LONG,
+	PULSE_ERROR,
+}state_button_t;
 
-#define LED_ON      GPIO_PIN_SET       // Macro to set LED on
-#define LED_OFF     GPIO_PIN_RESET     // Macro to set LED off
+typedef struct LedActiveObject
+{
+    QueueHandle_t queue_led_h;
+    TaskHandle_t *task_led_h;
+} LedActiveObject_t;
 
-/********************** Function Declarations *******************************/
+typedef enum led_type{
+	GREEN,
+	RED,
+	BLUE,
+}led_type_t;
 
-/**
- * @brief Task function for controlling the red LED.
- *
- * This function is responsible for controlling the red LED based on messages received.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_red(void *parameters);
+typedef struct config_led{
+	led_type_t color_led;
+	TickType_t time_led;
+}config_led_t;
 
-/**
- * @brief Task function for controlling the green LED.
- *
- * This function is responsible for controlling the green LED based on messages received.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_green(void *parameters);
+void led_initialize_ao(void* parameters, const char* ao_task_name, led_type_t led_type);
 
-/**
- * @brief Task function for controlling the blue LED.
- *
- * This function is responsible for controlling the blue LED based on messages received.
- *
- * @param parameters Task parameters (unused).
- */
-void task_led_blue(void *parameters);
-
-#endif /* TASK_LED_H_ */
+#endif /* INC_TASK_LED_H_ */

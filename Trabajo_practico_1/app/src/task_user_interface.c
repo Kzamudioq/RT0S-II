@@ -1,16 +1,9 @@
 /*
- * @file   : task_user_interface.c
- * @date   : May 9, 2024
- * @author : grupo_3
+ * task_user_interface.c
  *
- * @brief  : Task function for controlling the user interface.
- *
- * This file contains the task function for managing the user interface,
- * including monitoring button presses and controlling the LEDs based on
- * the duration of button presses.
+ *  Created on: May 9, 2024
+ *      Author: royer.sanabria
  */
-
-/********************** Inclusions *******************************************/
 
 #include "main.h"
 #include "cmsis_os.h"
@@ -20,92 +13,97 @@
 #include "board.h"
 #include "dwt.h"
 #include "task_user_interface.h"
+#include "task_button.h"
+#include "task_led.h"
+#include <stdlib.h>
 
-/********************** Task Functions ****************************************/
+#define TIME_PULSE_LOW 			200
+#define TIME_PULSE_MODERATE		1000
+#define TIME_PULSE_LONG		 	2000
+#define TIME_TURN_ON_LED_RED 	1000
+#define TIME_TURN_ON_LED_BLUE 	2000
+#define TIME_TURN_ON_LED_GREEN	3000
 
-/**
- * @brief Task function for controlling the user interface.
- *
- * This task handles the user interface, including button presses
- * and controlling the LED based on the duration of button presses.
- *
- * @param parameter Task parameters (unused).
- */
-void task_user_interface(void *parameter)
+typedef struct send_message_user_interface {
+    ButtonActiveObject_t *BAO_MS_UI;
+    LedActiveObject_t *LAOR_MS_UI;
+    LedActiveObject_t *LAOG_MS_UI;
+    LedActiveObject_t *LAOB_MS_UI;
+} message_user_interface_t;
+
+
+void task_user_interface(void *parameters);
+
+void user_interface_initialize_ao(void* parameters, void*  BAO, void*  LAOR, void*  LAOG, void*  LAOB)
 {
-    // Variables to store the state of the button and the button press duration
-    const char *p_state_button;
-    TickType_t time_tick;
-    state_button_t state_button;
-    message_led_t messaje_led;
+	InterfaceUserActiveObject_t* const AO = (InterfaceUserActiveObject_t*) parameters;
+	message_user_interface_t* const message_user_interface = malloc(sizeof(message_user_interface_t));
+	if (message_user_interface == NULL) { return;}
 
-    // Main task loop
+
+	message_user_interface->BAO_MS_UI = (ButtonActiveObject_t*) BAO;
+    message_user_interface->LAOR_MS_UI = (LedActiveObject_t*) LAOR;
+    message_user_interface->LAOB_MS_UI = (LedActiveObject_t*) LAOB;
+    message_user_interface->LAOG_MS_UI = (LedActiveObject_t*) LAOG;
+
+	BaseType_t ret;
+    ret = xTaskCreate(task_user_interface,
+    				  "Task user interface",
+					  (2 * configMINIMAL_STACK_SIZE),
+					  (void *)message_user_interface,
+					  (tskIDLE_PRIORITY + 1UL),
+					  AO->task_user_interface_h);
+    configASSERT(ret == pdPASS);
+    // LOGGER_LOG("\r\n --> Initialization of task button completed \r\n");
+
+}
+
+
+void task_user_interface(void *parameters)
+{
+	message_user_interface_t* message = (message_user_interface_t*) parameters;
+	ButtonActiveObject_t*  button = message->BAO_MS_UI;
+	LedActiveObject_t*  led_red= message->LAOR_MS_UI;
+	LedActiveObject_t*  led_blue = message->LAOB_MS_UI;
+	LedActiveObject_t*  led_green = message->LAOG_MS_UI;
+	TickType_t event;
+
+	state_button_t pulse = PULSE_OUT;
+
     while (true)
     {
-        // Wait for a message from the button queue
-        if (pdPASS == xQueueReceive(queue_pulse_h, &time_tick, portMAX_DELAY))
-        {
-            // Determine the state of the button based on the press duration
-            if (time_tick < TIME_PULSE_LOW)
-            {
-                state_button = PULSE_OUT;
-                p_state_button = "PULSE OUT";
-            }
-            else if (time_tick < TIME_PULSE_MODERATE)
-            {
-                state_button = PULSE_PULSE;
-                p_state_button = "PULSE PULSE";
-            }
-            else if (time_tick < TIME_PULSE_LONG)
-            {
-                state_button = PULSE_SHORT;
-                p_state_button = "PULSE SHORT";
-            }
-            else if (time_tick > TIME_PULSE_LONG)
-            {
-                state_button = PULSE_LONG;
-                p_state_button = "PULSE LONG";
-            }
-            else
-            {
-                state_button = PULSE_ERROR;
-                p_state_button = "PULSE ERROR";
-            }
 
-            // Log the button press duration and state
-            LOGGER_LOG("  --> Time button pressed %lu ms  <-->", time_tick);
-            LOGGER_LOG(" State Button: %s <-->", p_state_button);
+    	if (xQueueReceive(button->queue_button_h, &event, portMAX_DELAY) == pdPASS)
+    	{
+    		LOGGER_LOG("PULSE %lu",event);
 
-            // Take action based on the button state
-            switch (state_button)
-            {
-            case PULSE_OUT:
-                LOGGER_LOG("  LED's TURN OFF\r\n");
-                break;
+        	if(event < TIME_PULSE_LOW){pulse = PULSE_OUT;}
+        	else if (event < TIME_PULSE_MODERATE){pulse = PULSE_PULSE;}
+        	else if (event < TIME_PULSE_LONG){pulse = PULSE_SHORT;}
+        	else if (event > TIME_PULSE_LONG){pulse = PULSE_LONG;}
+        	else {pulse=PULSE_ERROR; }
+    	}
 
-            case PULSE_PULSE:
-                messaje_led.turn_on_led = TURN_ON;
-                messaje_led.tick_time_led = TIME_TURN_ON_LED_RED;
-                xQueueSend(queue_led_red_h, &messaje_led, 0);
-                break;
+    	switch (pulse)
+    	{
+    	case PULSE_PULSE:
+    		if(xQueueSend(led_red->queue_led_h, &pulse, portMAX_DELAY) != pdPASS){}
+    		    LOGGER_LOG(" -->PULSE SENT TO QUEUE RED\r\n");
+    		    break;
 
-            case PULSE_SHORT:
-                messaje_led.turn_on_led = TURN_ON;
-                messaje_led.tick_time_led = TIME_TURN_ON_LED_GREEN;
-                xQueueSend(queue_led_green_h, &messaje_led, 0);
-                break;
+    	case PULSE_LONG:
+    		if(xQueueSend(led_blue->queue_led_h, &pulse, portMAX_DELAY) != pdPASS){}
+    		    LOGGER_LOG(" --> PULSE SENT TO QUEUE BLUE\r\n");
+    		    break;
 
-            case PULSE_LONG:
-                messaje_led.turn_on_led = TURN_ON;
-                messaje_led.tick_time_led = TIME_TURN_ON_LED_BLUE;
-                xQueueSend(queue_led_blue_h, &messaje_led, 0);
-                break;
-
-            default:
-                LOGGER_LOG("ERROR PULSE\r\n");
-                // Handle error case
-                break;
-            }
-        }
+    	case PULSE_SHORT:
+    	    if(xQueueSend(led_green->queue_led_h, &pulse, portMAX_DELAY) != pdPASS){}
+    	    	LOGGER_LOG(" --> PULSE SENT TO QUEUE GREEN\r\n");
+    	    	break;
+    	default:
+    	    	LOGGER_LOG(" --> PULSE UNSEND\r\n");
+    			break;
+    	}
     }
+
 }

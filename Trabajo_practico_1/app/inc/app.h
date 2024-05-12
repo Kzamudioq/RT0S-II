@@ -1,13 +1,38 @@
 /*
+ * Copyright (c) 2023 Juan Manuel Cruz <jcruz@fi.uba.ar>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
  * @file   : app.h
- * @date   : May 8, 2024
- * @author : grupo_3
- * @version: v1.0.0
- *
- * @brief  : Header file for the application
- *
- * This file contains declarations for initializing the application and
- * defines constants related to task queues and handles.
+ * @date   : Set 26, 2023
+ * @author : Juan Manuel Cruz <jcruz@fi.uba.ar> <jcruz@frba.utn.edu.ar>
+ * @version	v1.0.0
  */
 
 #ifndef APP_INC_APP_H_
@@ -17,27 +42,24 @@
 extern "C" {
 #endif
 
-/* Define queue parameters */
-#define LENGTH_QUEUE_PULSE 5          /**< Maximum length of the pulse queue */
-#define SIZE_QUEUE_PULSE (sizeof(TickType_t)) /**< Size of each item in the pulse queue */
-#define LENGTH_QUEUE_LED 5            /**< Maximum length of the LED queue */
-#define SIZE_QUEUE_LED (sizeof(message_led_t)) /**< Size of each item in the LED queue */
+#include "task_button.h"
+#include "task_led.h"
+#include "task_user_interface.h"
 
-/* Extern Task Handles */
-extern xTaskHandle task_led_red_h;       /**< Handle for the red LED task */
-extern xTaskHandle task_led_green_h;     /**< Handle for the green LED task */
-extern xTaskHandle task_led_blue_h;      /**< Handle for the blue LED task */
-extern xTaskHandle task_button_h;        /**< Handle for the button task */
-extern xTaskHandle task_user_interface_h;/**< Handle for the user interface task */
+/*Define*/
 
-/* Extern Queues */
-extern xQueueHandle queue_pulse_h;       /**< Queue for pulse messages */
-extern xQueueHandle queue_led_red_h;     /**< Queue for red LED messages */
-extern xQueueHandle queue_led_green_h;   /**< Queue for green LED messages */
-extern xQueueHandle queue_led_blue_h;    /**< Queue for blue LED messages */
+extern ButtonActiveObject_t ao_button;
 
-/* Function prototypes */
-void app_init(void); /**< Initialize the application */
+extern InterfaceUserActiveObject_t ao_user_interface;
+extern LedActiveObject_t    ao_led_red;
+extern LedActiveObject_t    ao_led_blue;
+extern LedActiveObject_t    ao_led_green;
+
+void app_init(void);
+
+
+
+
 
 #ifdef __cplusplus
 }

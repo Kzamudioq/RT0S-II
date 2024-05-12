@@ -1,1 +1,2 @@
-../app/src/task_user_interface.c:26:6:task_user_interface	40	static
+../app/src/task_user_interface.c:37:6:user_interface_initialize_ao	48	static,ignoring_inline_asm
+../app/src/task_user_interface.c:62:6:task_user_interface	48	static

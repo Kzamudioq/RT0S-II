@@ -1,18 +1,9 @@
 /*
- * @file   : task_app.c
- * @date   : May 9, 2024
- * @author : grupo_3
- * @version: v1.0.0
+ * task_app.c
  *
- * @brief  : Application initialization and task creation
- *
- * This file initializes the application by creating tasks and queues,
- * and initializing necessary peripherals. It includes the necessary headers
- * and defines task and queue handles for the LED tasks, button task, and user interface task.
- * Additionally, it defines the application initialization function, `app_init()`.
+ *  Created on: May 9, 2024
+ *      Author: royer.sanabria
  */
-
-/********************** Inclusions *******************************************/
 
 #include "task_led.h"
 #include "main.h"
@@ -24,98 +15,30 @@
 #include "task_button.h"
 #include "task_user_interface.h"
 
-/********************** Task and Queue Handles ********************************/
+#define a 1000
 
-/* Task Handle */
-xTaskHandle task_led_red_h;
-xTaskHandle task_led_green_h;
-xTaskHandle task_led_blue_h;
-xTaskHandle task_button_h;
-xTaskHandle task_user_interface_h;
 
-/* Queue Handle */
-xQueueHandle queue_pulse_h;
-xQueueHandle queue_led_red_h;
-xQueueHandle queue_led_blue_h;
-xQueueHandle queue_led_green_h;
+/*Message*/
+const char *p_sys	= " --> RTOS2-TP1 <--> Developed by: Tatiana, Lautaro y Royer.\r\n";
 
-/* Message */
-const char *p_sys = " RTOS - Event-Triggered Systems (ETS)\r\n";
+ButtonActiveObject_t ao_button;
+LedActiveObject_t    ao_led_red;
+LedActiveObject_t    ao_led_blue;
+LedActiveObject_t    ao_led_green;
+InterfaceUserActiveObject_t ao_user_interface;
 
-/********************** Function Definitions *********************************/
+void app_init(void)
+{
+	LOGGER_LOG(p_sys);
 
-/**
- * @brief Initializes the application.
- *
- * This function initializes the application, creating tasks and queues,
- * and initializing necessary peripherals.
- */
-void app_init(void) {
-    LOGGER_LOG(p_sys);
 
-    /* Create queue for pulse */
-    queue_pulse_h = xQueueCreate(LENGTH_QUEUE_PULSE, SIZE_QUEUE_PULSE);
-    configASSERT(queue_pulse_h != NULL);
+	button_initialize_ao(&ao_button);
+	led_initialize_ao(&ao_led_red, "TASK LED RED",RED);
+	led_initialize_ao(&ao_led_green, "TASK LED GREEN",GREEN);
+	led_initialize_ao(&ao_led_blue, "TASK LED BLUE",BLUE);
 
-    /* Create queue for red LED */
-    queue_led_red_h = xQueueCreate(LENGTH_QUEUE_LED, SIZE_QUEUE_LED);
-    configASSERT(queue_led_red_h != NULL);
+	user_interface_initialize_ao(&ao_user_interface, &ao_button, &ao_led_red, &ao_led_green, &ao_led_blue);
 
-    /* Create queue for blue LED */
-    queue_led_blue_h = xQueueCreate(LENGTH_QUEUE_LED, SIZE_QUEUE_LED);
-    configASSERT(queue_led_blue_h != NULL);
-
-    /* Create queue for green LED */
-    queue_led_green_h = xQueueCreate(LENGTH_QUEUE_LED, SIZE_QUEUE_LED);
-    configASSERT(queue_led_green_h != NULL);
-
-    /* Create Task for red LED */
-    BaseType_t ret = xTaskCreate(task_led_red,
-                                  "Task led red",
-                                  (2 * configMINIMAL_STACK_SIZE),
-                                  NULL,
-                                  (tskIDLE_PRIORITY + 1UL),
-                                  &task_led_red_h);
-    configASSERT(ret == pdPASS);
-
-    /* Create Task for blue LED */
-    ret = xTaskCreate(task_led_blue,
-                      "Task led blue",
-                      (2 * configMINIMAL_STACK_SIZE),
-                      NULL,
-                      (tskIDLE_PRIORITY + 1UL),
-                      &task_led_blue_h);
-    configASSERT(ret == pdPASS);
-
-    /* Create Task for green LED */
-    ret = xTaskCreate(task_led_green,
-                      "Task led green",
-                      (2 * configMINIMAL_STACK_SIZE),
-                      NULL,
-                      (tskIDLE_PRIORITY + 1UL),
-                      &task_led_green_h);
-    configASSERT(ret == pdPASS);
-
-    /* Create Task for button */
-    ret = xTaskCreate(task_button,
-                      "Task button",
-                      (2 * configMINIMAL_STACK_SIZE),
-                      NULL,
-                      (tskIDLE_PRIORITY + 1UL),
-                      &task_button_h);
-    configASSERT(ret == pdPASS);
-
-    /* Create Task for user interface */
-    ret = xTaskCreate(task_user_interface,
-                      "Task user interface",
-                      (2 * configMINIMAL_STACK_SIZE),
-                      NULL,
-                      (tskIDLE_PRIORITY + 1UL),
-                      &task_user_interface_h);
-    configASSERT(ret == pdPASS);
-
-    /* Initialize cycle counter */
     cycle_counter_init();
-
-    LOGGER_LOG(" <--> Tasks App Init running \r\n");
 }
+

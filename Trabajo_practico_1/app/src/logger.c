@@ -1,18 +1,41 @@
 /*
+ * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
  * @file   : logger.c
- * @date   : May 8, 2024
  * @author : Sebastian Bedin <sebabedin@gmail.com>
- * @version: v1.0.0
- *
- * @brief  : Logger implementation
- *
- * This file implements the logger functionality, including logging messages
- * to the console using semihosting or disabling logging altogether based on
- * configuration options. It includes necessary headers and defines the internal
- * data structures and functions required for logging.
+ * @version	v1.0.0
  */
 
-/********************** Inclusions *******************************************/
+/********************** inclusions *******************************************/
 
 #include <stdio.h>
 #include <stdint.h>
@@ -24,48 +47,35 @@
 
 #include "logger.h"
 
-/********************** Macros and Definitions *******************************/
+/********************** macros and definitions *******************************/
 
-/********************** Internal Data Declaration ****************************/
+/********************** internal data declaration ****************************/
 
-/********************** Internal Functions Declaration ***********************/
+/********************** internal functions declaration ***********************/
 
-/********************** Internal Data Definition ******************************/
+/********************** internal data definition *****************************/
 
-/********************** External Data Definition ******************************/
+/********************** external data definition *****************************/
 
-/* Buffer to hold the log message */
 static char logger_msg_buffer_[LOGGER_CONFIG_MAXLEN];
 char* const logger_msg = logger_msg_buffer_;
 int logger_msg_len;
 
-/********************** Internal Functions Definition ************************/
+/********************** internal functions definition ************************/
 
-/********************** External Functions Definition ************************/
+/********************** external functions definition ************************/
 
 #if 1 == LOGGER_CONFIG_USE_SEMIHOSTING
-/**
- * @brief Print the log message to the console using semihosting.
- *
- * @param msg Pointer to the message string to be printed.
- */
 void logger_log_print_(char* const msg)
 {
-    printf(msg);
-    fflush(stdout);
+	printf(msg);
+	fflush(stdout);
 }
 #else
-/**
- * @brief Dummy function to disable logging.
- *
- * This function does nothing when logging is disabled.
- *
- * @param msg Pointer to the message string to be printed (unused).
- */
 void logger_log_print_(char* const msg)
 {
     return;
 }
 #endif
 
-/********************** End of File ******************************************/
+/********************** end of file ******************************************/
