@@ -26,7 +26,7 @@ Para resolver este problema, se implementó un sistema basado en un microcontrol
 
 El proyecto está diseñado para controlar tres LEDs (rojo, verde y azul) mediante la activación de un botón. Cada LED se enciende por 1 segundo en función del estado del botón detectado. A continuación, se describe el código implementado:
 
-#### led.c
+#### task_led.c
 
 Este archivo contiene las funciones de tarea para controlar los LEDs rojo, verde y azul. Cada tarea escucha su cola correspondiente para mensajes que contienen instrucciones para encender el LED durante una duración especificada. Cuando se recibe un mensaje, la tarea enciende el LED, espera la duración especificada y luego lo apaga.
 
@@ -51,6 +51,10 @@ Cada integrante del grupo 3 dispone de una placa de desarrollo STM32 F401RE.
 ### Verificación y Entrega
 
 Se realizó una verificación del correcto funcionamiento del sistema, lo cual incluye una demostración en video. El proyecto se entrega como un proyecto compatible con STM32CubeIDE, listo para su compilación y carga en el microcontrolador.
+
+### Integrantes del Grupo 3
+
+Los integrantes del grupo 3 son: Royer Sanabria, Karen Zamudio y Lautaro Quarín. La mente central fue Royer, pero indudablemente el código pasó por manos de los tres integrantes. 💡💻
 
 ## Contribuciones
 
