@@ -52,6 +52,11 @@ Cada integrante del grupo 3 dispone de una placa de desarrollo STM32 F401RE.
 
 Se realizó una verificación del correcto funcionamiento del sistema, lo cual incluye una demostración en video. El proyecto se entrega como un proyecto compatible con STM32CubeIDE, listo para su compilación y carga en el microcontrolador.
 
+
+https://github.com/Kzamudioq/RT0S-II/assets/138271936/3c10c813-12f4-4709-abbc-aabf4f176b8f
+
+
+
 ### Integrantes del Grupo 3
 
 Los integrantes del grupo 3 son: Royer Sanabria, Karen Zamudio y Lautaro Quarín. La mente central fue Royer, pero indudablemente el código pasó por manos de los tres integrantes. 💡💻
