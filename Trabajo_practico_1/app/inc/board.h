@@ -2,8 +2,10 @@
  * board.h
  *
  *  Created on: May 8, 2024
- *      Author: royer.sanabria
+ *      Author: Grupo_3
  */
+
+#include "stm32f4xx_hal.h"
 
 #ifndef INC_BOARD_H_
 #define INC_BOARD_H_

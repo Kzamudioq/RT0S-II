@@ -1,44 +1,57 @@
 /*
- * task_app.c
+ * app.c
  *
  *  Created on: May 9, 2024
- *      Author: royer.sanabria
+ *      Author: Grupo_3
  */
 
-#include "task_led.h"
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
 #include "app.h"
-#include "task_button.h"
-#include "task_user_interface.h"
 
-#define a 1000
+/* Message */
+const char *p_sys =
+		" --> RTOS2-TP1 <--> Developed by: Tatiana, Lautaro y Royer.\r\n";
 
+// Configuration for red LED
+LedConfig_t led_config_red = { .port = LED_R_GPIO_Port, .pin = LED_R_Pin,
+		.delay_led = TIME_TURN_ON_LED };
 
-/*Message*/
-const char *p_sys	= " --> RTOS2-TP1 <--> Developed by: Tatiana, Lautaro y Royer.\r\n";
+// Configuration for green LED
+LedConfig_t led_config_green = { .port = LED_G_GPIO_Port, .pin = LED_G_Pin,
+		.delay_led = TIME_TURN_ON_LED };
 
+// Configuration for blue LED
+LedConfig_t led_config_blue = { .port = LED_B_GPIO_Port, .pin = LED_B_Pin,
+		.delay_led = TIME_TURN_ON_LED };
+
+// Configuration for button
+ButtonConfig_t button_config = { .port = PORT_BUTTON, .pin = PIN_BUTTON };
+
+// Active objects
 ButtonActiveObject_t ao_button;
-LedActiveObject_t    ao_led_red;
-LedActiveObject_t    ao_led_blue;
-LedActiveObject_t    ao_led_green;
+LedActiveObject_t ao_led_red;
+LedActiveObject_t ao_led_blue;
+LedActiveObject_t ao_led_green;
 InterfaceUserActiveObject_t ao_user_interface;
 
-void app_init(void)
-{
+/**
+ * @brief Initializes the application components.
+ */
+void app_init(void) {
 	LOGGER_LOG(p_sys);
 
+	// Initialize button active object
+	button_initialize_ao(&ao_button, button_config);
 
-	button_initialize_ao(&ao_button);
-	led_initialize_ao(&ao_led_red, "TASK LED RED",RED);
-	led_initialize_ao(&ao_led_green, "TASK LED GREEN",GREEN);
-	led_initialize_ao(&ao_led_blue, "TASK LED BLUE",BLUE);
+	// Initialize LED active objects
+	led_initialize_ao(&ao_led_red, "Task: LED RED", RED, led_config_red);
+	led_initialize_ao(&ao_led_green, "Task: LED GREEN", GREEN,
+			led_config_green);
+	led_initialize_ao(&ao_led_blue, "Task: LED BLUE", BLUE, led_config_blue);
 
-	user_interface_initialize_ao(&ao_user_interface, &ao_button, &ao_led_red, &ao_led_green, &ao_led_blue);
+	// Initialize user interface active object
+	user_interface_initialize_ao(&ao_user_interface, &ao_button, &ao_led_red,
+			&ao_led_green, &ao_led_blue);
 
-    cycle_counter_init();
+	// Initialize cycle counter
+	cycle_counter_init();
 }
-
