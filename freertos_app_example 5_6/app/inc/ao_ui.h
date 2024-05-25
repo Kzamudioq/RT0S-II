@@ -5,8 +5,8 @@
  *      Author: Grupo_3
  */
 
-#ifndef TASK_USER_INTERFACE_H_
-#define TASK_USER_INTERFACE_H_
+#ifndef AO_UI_H_
+#define AO_UI_H_
 
 #include "cmsis_os.h"
 #include "stm32f4xx_hal.h"
@@ -21,18 +21,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-// Define the structure for the interface user active object
+// Estructura del objeto activo de la interfaz de usuario
 typedef struct {
-    TaskHandle_t *task_user_interface_h; // Handle for the user interface task
-} InterfaceUserActiveObject_t;
+    ButtonActiveObject_t *button_ao; // Referencia al objeto activo del botón
+    LEDActiveObject *led_ao;         // Referencia al objeto activo de los LEDs
+} UIActiveObject_t;
 
-// Define the structure for the message used by the user interface
-typedef struct {
-    ButtonActiveObject_t *BAO_MS_UI; // Pointer to the button active object
-    LedActiveObject_t *LAO_MS_UI;   // Pointer to the LED active object
-} message_user_interface_t;
+// Prototipos de funciones
+void ui_initialize_ao(UIActiveObject_t *ao, ButtonActiveObject_t *button_ao, LEDActiveObject *led_ao);
+void ui_task(void *parameters);
 
-// Function to initialize the user interface active object
-void user_interface_initialize_ao(void *parameters, void *BAO, void *LAO);
-
-#endif /* TASK_USER_INTERFACE_H_ */
+#endif /* AO_UI_H_ */

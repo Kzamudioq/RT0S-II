@@ -1,85 +1,131 @@
 /*
  * oa_led.c
  *
- *  Created on: May 8, 2024
- *   Author: Grupo_3
+ * Created on: May 8, 2024
+ * Author: Grupo_3
  */
 
 #include "cmsis_os.h"
 #include "logger.h"
 #include "board.h"
 #include "dwt.h"
-
 #include "oa_led.h"
-#include "task_button.h"
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
 
-#define LED_ON GPIO_PIN_SET
-#define LED_OFF GPIO_PIN_RESET
-#define LENGTH_QUEUE_PULSE 5
-#define SIZE_QUEUE_PULSE sizeof(state_button_t)
+#define LED_AO_QUEUE_LENGTH 15
+#define NUM_LEDS (sizeof(led_configs) / sizeof(led_configs[0]))
 
-// Array de nombres de colores
-const char *color_names[] = { "RED", "GREEN", "BLUE" };
+// LED Configuration Array
+const LedConfig_t led_configs[] = {
+    { .port = LED_R_GPIO_Port, .pin = LED_R_Pin, .color = RED },
+    { .port = LED_G_GPIO_Port, .pin = LED_G_Pin, .color = GREEN },
+    { .port = LED_B_GPIO_Port, .pin = LED_B_Pin, .color = BLUE },
+};
 
-// Task function for LED control
-static void task_led(void *parameters);
+// Private Function Prototypes
+static void led_task(void* parameters);
+static void process_led_event(const LEDEvent* event);
 
-/**
- * @brief Initializes the LED active object.
- *
- * @param parameters Pointer to the LED active object.
- * @param ao_task_name Name of the LED task.
- * @param led_configs Array of LED configurations.
- * @param num_leds Number of LEDs.
- */
-void led_initialize_ao(void *parameters, const char *ao_task_name,
-	LedConfig_t *led_configs, uint8_t num_leds) {
-	BaseType_t ret;
-	LedActiveObject_t *AO = (LedActiveObject_t*) parameters;
-
-	// Create LED task
-	ret = xTaskCreate(task_led, ao_task_name, 2 * configMINIMAL_STACK_SIZE,
-			(void*) AO, tskIDLE_PRIORITY + 1UL, AO->task_led_h);
-	configASSERT(ret == pdPASS);
-
-	// Create LED queue
-	AO->queue_led_h = xQueueCreate(LENGTH_QUEUE_PULSE, SIZE_QUEUE_PULSE);
-	configASSERT(AO->queue_led_h != NULL);
-
-	// Assign LED configurations
-	AO->led_configs = led_configs;
-	AO->num_leds = num_leds;
-
-	LOGGER_LOG(" --> '%s' created for LED control\r\n", ao_task_name);
+// LED Control Functions
+void led_toggle(uint8_t led_index) {
+    assert(led_index < NUM_LEDS);  // Check that led_index is within range
+    HAL_GPIO_TogglePin(led_configs[led_index].port, led_configs[led_index].pin);
 }
 
-/**
- * @brief Task for controlling the LED.
- *
- * @param parameters Pointer to the LED active object.
- */
-void task_led(void *parameters) {
-	LedActiveObject_t *led = (LedActiveObject_t*) parameters;
-	state_button_t event;
+void led_write(uint8_t led_index, const LEDStatus status) {
+    if (led_index >= NUM_LEDS) {
+        LOGGER_LOG("Error: Invalid LED index\r\n");
+        return;
+    }
 
-	while (true) {
-		// Receive events from the LED queue
-		if (xQueueReceive(led->queue_led_h, &event, portMAX_DELAY) == pdPASS) {
-			uint8_t led_index = event - 1; // Assuming the event indicates LED index
-			if (led_index < led->num_leds) {
-				LedConfig_t *config = &(led->led_configs[led_index]);
-				LOGGER_LOG(" LED of color %s turned ON by: %s\r\n",
-						color_names[config->color], pcTaskGetName(NULL));
-				// Turn on LED
-				HAL_GPIO_WritePin(config->port, config->pin, LED_ON);
-				HAL_Delay(config->delay_led);
-				// Turn off LED
-				HAL_GPIO_WritePin(config->port, config->pin, LED_OFF);
-				LOGGER_LOG(" LED of color %s turned OFF by: %s\r\n",
-						color_names[config->color], pcTaskGetName(NULL));
-			}
-		}
-	}
+    assert(status == LED_ON || status == LED_OFF);
+    GPIO_PinState state = (status == LED_ON) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    HAL_GPIO_WritePin(led_configs[led_index].port, led_configs[led_index].pin, state);
+}
+
+void led_set(uint8_t led_index) {
+    led_write(led_index, LED_ON);
+}
+
+void led_clear(uint8_t led_index) {
+    led_write(led_index, LED_OFF);
+}
+
+// LED Active Object Functions
+void led_initialize_ao(LEDActiveObject* ao, const char* ao_task_name) {
+    BaseType_t ret;
+    ret = xTaskCreate(led_task, ao_task_name, (2 * configMINIMAL_STACK_SIZE), (void*) ao, (tskIDLE_PRIORITY + 1UL), &ao->task);
+    configASSERT(ret == pdPASS);
+    ao->queue = xQueueCreate(LED_AO_QUEUE_LENGTH, sizeof(LEDEvent));
+    configASSERT(ao->queue);
+}
+
+void led_destroy_ao(LEDActiveObject* ao) {
+    if (ao->task != NULL) {
+        vTaskDelete(ao->task);
+        ao->task = NULL;
+    }
+    if (ao->queue != NULL) {
+        vQueueDelete(ao->queue);
+        ao->queue = NULL;
+    }
+}
+
+void led_ao_send_event(LEDActiveObject* ao, const LEDEvent* event) {
+    if (ao == NULL || event == NULL) {
+        LOGGER_LOG("Error: Se detectó un puntero NULL en led_ao_send_event\n");
+        return;
+    }
+
+    if (xQueueSend(ao->queue, event, portMAX_DELAY) != pdPASS) {
+        LOGGER_LOG("Error al enviar el evento LED\n");
+    }
+}
+
+// Private Functions
+static void led_task(void* parameters) {
+    LEDActiveObject* const AO = (LEDActiveObject*) parameters;
+    LEDEvent event;
+    LOGGER_LOG("  --> '%s' created for LED control\n", pcTaskGetName(NULL));
+
+    while (1) {
+        if (xQueueReceive(AO->queue, &event, portMAX_DELAY) == pdPASS) {
+            process_led_event(&event);
+        }
+    }
+}
+
+static void process_led_event(const LEDEvent* event) {
+    LOGGER_LOG("[%s] Event Received: ", pcTaskGetName(NULL));
+    if (event == NULL) {
+        LOGGER_LOG("Error: Received NULL event\r\n");
+        return;
+    }
+
+    if (event->led_index >= NUM_LEDS) {
+        LOGGER_LOG("Error: Invalid LED index\r\n");
+        return;
+    }
+
+    switch (event->type) {
+    case LED_EVENT_ON:
+        LOGGER_LOG("LED_EVENT_ON\r\n");
+        led_set(event->led_index);
+        break;
+    case LED_EVENT_OFF:
+        LOGGER_LOG("LED_EVENT_OFF\r\n");
+        led_clear(event->led_index);
+        break;
+    case LED_EVENT_TOGGLE:
+        LOGGER_LOG("LED_EVENT_TOGGLE\r\n");
+        led_toggle(event->led_index);
+        break;
+    default:
+        LOGGER_LOG("Invalid LED event type\r\n");
+        configASSERT(pdFAIL && "Invalid LED event");
+        break;
+    }
 }
