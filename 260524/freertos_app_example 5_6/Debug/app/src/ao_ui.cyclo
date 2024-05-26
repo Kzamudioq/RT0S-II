@@ -1,0 +1,4 @@
+../app/src/ao_ui.c:11:6:ui_initialize_ao	2
+../app/src/ao_ui.c:22:6:ui_destroy_ao	2
+../app/src/ao_ui.c:31:6:process_button_event	9
+../app/src/ao_ui.c:87:6:ui_task	6

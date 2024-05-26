@@ -1,0 +1,2 @@
+../app/src/task_button.c:22:6:button_initialize_ao	48	static,ignoring_inline_asm
+../app/src/task_button.c:37:6:task_button	32	static
