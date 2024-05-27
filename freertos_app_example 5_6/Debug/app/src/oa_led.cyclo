@@ -1,9 +1,0 @@
-../app/src/oa_led.c:33:6:led_toggle	1
-../app/src/oa_led.c:38:6:led_write	3
-../app/src/oa_led.c:49:6:led_set	1
-../app/src/oa_led.c:53:6:led_clear	1
-../app/src/oa_led.c:58:6:led_initialize_ao	3
-../app/src/oa_led.c:66:6:led_destroy_ao	3
-../app/src/oa_led.c:77:6:led_ao_send_event	4
-../app/src/oa_led.c:89:13:led_task	2
-../app/src/oa_led.c:101:13:process_led_event	7

@@ -1,9 +1,0 @@
-../app/src/oa_led.c:30:6:led_toggle	16	static
-../app/src/oa_led.c:35:6:led_write	24	static
-../app/src/oa_led.c:46:6:led_set	16	static
-../app/src/oa_led.c:50:6:led_clear	16	static
-../app/src/oa_led.c:54:6:led_initialize_ao	40	static,ignoring_inline_asm
-../app/src/oa_led.c:64:6:led_destroy_ao	16	static
-../app/src/oa_led.c:75:6:led_ao_send_event	16	static
-../app/src/oa_led.c:86:13:led_task	24	static
-../app/src/oa_led.c:97:13:process_led_event	24	static
