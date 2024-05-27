@@ -73,7 +73,7 @@ Se realizó una verificación del correcto funcionamiento del sistema, lo cual i
 
 ### Integrantes del Grupo 3
 
-Los integrantes del grupo 3 son: Royer Sanabria, Karen Zamudio y Lautaro Quarín. La mente central fue Royer, pero indudablemente el código pasó por manos de los tres integrantes. 💡💻
+Los integrantes del grupo 3 son: Royer Sanabria, Karen Zamudio y Lautaro Quarín. La mente central Royer y Tatiana, pero indudablemente el código pasó por manos de los tres integrantes. 💡💻
 
 ## Contribuciones
 
