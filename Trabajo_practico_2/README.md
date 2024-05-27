@@ -1,5 +1,5 @@
 
-# Trabajo Práctico 1: Sistemas Reactivos
+# Trabajo Práctico 2: Memoria Dinámica
 
 ## Problema
 
@@ -15,6 +15,23 @@ Se requiere implementar un sistema para el control de tres LEDs (rojo, verde y a
     - El LED rojo debe encenderse por 1 segundo si se detecta un botón pulso. 🔴
     - El LED verde debe encenderse por 1 segundo si se detecta un botón corto. 💚
     - El LED azul debe encenderse por 1 segundo si se detecta un botón largo. 🔵
+
+## Requerimientos
+
+1. **Cumplir con la descripción funcional del problema**:
+    - Se requiere enviar un video de la solución para verificar el correcto funcionamiento. (20pts)
+
+2. **Implementación de bloques de procesamiento**:
+    - **Procesamiento del botón**:
+        - Implementar una tarea para el procesamiento del botón.
+    - **Lógica del problema**:
+        - Implementar un objeto activo que realice el procesamiento del estado del botón y genere una acción sobre los LEDs. Este objeto activo se llamará Interfaz de Usuario. (20pts)
+    - **Control de los LEDs**:
+        - Implementar un objeto activo que controle los tres LEDs. (20pts)
+        - El objeto activo de control de LED se debe instanciar solo si es requerido. Para eso, se solicita aplicar una arquitectura que permita crear y destruir sus recursos para poder liberar memoria para otros procesos no descriptos en este trabajo. (20pts)
+
+3. **Encapsulamiento**:
+    - Encapsular el funcionamiento de los distintos módulos del sistema. (10pts)
 
 ## Solución
 
@@ -52,10 +69,7 @@ Cada integrante del grupo 3 dispone de una placa de desarrollo STM32 F401RE.
 
 Se realizó una verificación del correcto funcionamiento del sistema, lo cual incluye una demostración en video. El proyecto se entrega como un proyecto compatible con STM32CubeIDE, listo para su compilación y carga en el microcontrolador.
 
-
-https://github.com/Kzamudioq/RT0S-II/assets/138271936/3c10c813-12f4-4709-abbc-aabf4f176b8f
-
-
+[Ver video de demostración](https://github.com/Kzamudioq/RT0S-II/assets/138271936/3c10c813-12f4-4709-abbc-aabf4f176b8f) 📹
 
 ### Integrantes del Grupo 3
 
@@ -63,4 +77,4 @@ Los integrantes del grupo 3 son: Royer Sanabria, Karen Zamudio y Lautaro Quarín
 
 ## Contribuciones
 
-Las contribuciones al proyecto son bienvenidas. Siéntete libre de proponer mejoras en el código, sugerir nuevas funcionalidades o reportar problemas encontrados durante su uso.
+Las contribuciones al proyecto son bienvenidas. Siéntete libre de proponer mejoras en el código, sugerir nuevas funcionalidades o reportar problemas encontrados durante su uso. 🚀
