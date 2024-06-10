@@ -1,5 +1,5 @@
 
-# Trabajo Práctico 3: Memoria Dinámica
+# Trabajo Práctico 3:  Controladores de dispositivos
 
 ## Problema
 
