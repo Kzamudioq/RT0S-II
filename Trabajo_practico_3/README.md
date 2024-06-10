@@ -12,27 +12,33 @@ Se requiere implementar un sistema para el control de tres LEDs (rojo, verde y a
     - **No presionado**: Para cualquier otro caso. ❌
 
 2. **Funcionamiento de los LEDs**:
-    - El LED rojo debe encenderse por 1 segundo si se detecta un botón pulso. 🔴
-    - El LED verde debe encenderse por 1 segundo si se detecta un botón corto. 💚
-    - El LED azul debe encenderse por 1 segundo si se detecta un botón largo. 🔵
+    - El LED rojo debe encenderse por 5 segundos si se detecta un botón pulso.
+    - El LED verde debe encenderse por 5 segundos si se detecta un botón corto.
+    - El LED azul debe encenderse por 5 segundos si se detecta un botón largo.
+    - Solo se encenderá un LED a la vez.
+    - Se debe detectar y encolar las pulsaciones del botón. Los LEDs se encienden según su prioridad: azul (mayor), verde (media) y rojo (menor).
 
 ## Requerimientos
 
-1. **Cumplir con la descripción funcional del problema**:
-    - Se requiere enviar un video de la solución para verificar el correcto funcionamiento. (20pts)
+1. **Cumplir con la descripción funcional del problema** (20 pts):
+    - Enviar un video de la solución para verificar el correcto funcionamiento.
 
 2. **Implementación de bloques de procesamiento**:
-    - **Procesamiento del botón**:
-        - Implementar una tarea para el procesamiento del botón.
-    - **Lógica del problema**:
-        - Implementar un objeto activo que realice el procesamiento del estado del botón y genere una acción sobre los LEDs. Este objeto activo se llamará Interfaz de Usuario. (20pts)
-    - **Control de los LEDs**:
-        - Implementar un objeto activo que controle los tres LEDs. (20pts)
-        - El objeto activo de control de LED se debe instanciar solo si es requerido. Para eso, se solicita aplicar una arquitectura que permita crear y destruir sus recursos para poder liberar memoria para otros procesos no descriptos en este trabajo. (20pts)
+    - Implementar una tarea para el procesamiento del botón.
+    - Implementar un objeto activo que realice el procesamiento del estado del botón y genere una acción sobre los LEDs. Este objeto activo se llamará Interfaz de Usuario (20 pts).
+    - Implementar un objeto activo que controle los tres LEDs (20 pts).
+    - El objeto activo de control de LED se debe instanciar solo si es requerido. Para esto, se solicita aplicar una arquitectura que permita crear y destruir sus recursos para poder liberar memoria para otros procesos no descriptos en este trabajo.
+    - La comunicación entre las tareas debe realizarse mediante la implementación de una cola de prioridades. Los mensajes enviados a la cola deben contener información sobre su prioridad. El envío de mensajes podrá ser de forma desordenada (sin prioridad), pero la recepción siempre debe devolver el mensaje más prioritario (20 pts).
 
 3. **Encapsulamiento**:
-    - Encapsular el funcionamiento de los distintos módulos del sistema. (10pts)
+    - Encapsular el funcionamiento de los distintos módulos del sistema (10 pts).
 
+4. **Proyecto STM32CubeIDE**:
+    - Entregar un proyecto compatible con STM32CubeIDE (10 pts).
+
+5. **Utilización del trabajo previo**:
+    - Utilizar como base el trabajo realizado en el TP1.
+    - 
 ## Solución
 
 ### Descripción de la Solución
