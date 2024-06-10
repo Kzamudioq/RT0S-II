@@ -75,7 +75,7 @@ Cada integrante del grupo 3 dispone de una placa de desarrollo STM32 F401RE.
 
 Se realizó una verificación del correcto funcionamiento del sistema, lo cual incluye una demostración en video. El proyecto se entrega como un proyecto compatible con STM32CubeIDE, listo para su compilación y carga en el microcontrolador.
 
-[Ver video de demostración](https://github.com/Kzamudioq/RT0S-II/blob/main/Trabajo_practico_3/Video/Trabajo%20practico%202.mp4) 📹 📹
+[Ver video de demostración](https://github.com/Kzamudioq/RT0S-II/tree/4fa53415525d0978f9875a9e825755bc4aea497d/Trabajo_practico_3/Video) 📹 📹
 
 ### Integrantes del Grupo 3
 
