@@ -1,0 +1,4 @@
+../app/src/task_led.c:51:6:LED_Init	40	static,ignoring_inline_asm
+../app/src/task_led.c:73:6:Led_Task	16	static
+../app/src/task_led.c:93:6:Check_And_Delet_Task	8	static
+../app/src/task_led.c:113:6:Process_Led_Msg	16	static

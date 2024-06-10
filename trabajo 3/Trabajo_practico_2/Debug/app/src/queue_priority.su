@@ -1,5 +1,0 @@
-../app/src/queue_priority.c:11:19:priority_queue_create	24	static
-../app/src/queue_priority.c:27:6:priority_queue_destroy	16	static
-../app/src/queue_priority.c:35:5:priority_queue_push	40	static
-../app/src/queue_priority.c:53:7:priority_queue_pop	24	static
-../app/src/queue_priority.c:66:5:priority_queue_is_empty	16	static
